@@ -1,8 +1,10 @@
-import React, { useState, useReducer } from "react";
+import React, { useState, useReducer, useContext } from "react";
 
 import Card from "../UI/Card/Card";
 import classes from "./Login.module.css";
 import Button from "../UI/Button/Button";
+import AuthContext from "../../store/auth-context";
+import Input from "../UI/Input/Input";
 
 const emailReducer = (state, action) => {
   console.log(action);
@@ -16,18 +18,17 @@ const emailReducer = (state, action) => {
 };
 
 const passwordReducer = (state, action) => {
-  if(action.type==='PASSWORD_INPUT'){
-    return {value: action.val, isValid: action.val.length>6}
+  if (action.type === "PASSWORD_INPUT") {
+    return { value: action.val, isValid: action.val.length > 6 };
   }
-  if(action.type==='INPUT_BLUR'){
-    return {value: state.value, isValid: state.isValid}
+  if (action.type === "INPUT_BLUR") {
+    return { value: state.value, isValid: state.isValid };
   }
   return { value: "", isValid: false };
 };
 
-const Login = (props) => {
- 
-  const [collegeIsValid, setCollegeIsValid] = useState(); 
+const Login = () => {
+  const [collegeIsValid, setCollegeIsValid] = useState();
   const [formIsValid, setFormIsValid] = useState(false);
 
   const [emailState, dispatchEmail] = useReducer(emailReducer, {
@@ -39,6 +40,8 @@ const Login = (props) => {
     value: "",
     isValid: null,
   });
+
+  const authCtx = useContext(AuthContext);
 
   /*  useEffect(() => {
     setFormIsValid(
@@ -57,10 +60,10 @@ const Login = (props) => {
   const passwordChangeHandler = (event) => {
     dispatchPassword({ type: "PASSWORD_INPUT", val: event.target.value });
 
-    setFormIsValid(emailState.isValid && passwordState.value.length>6);
+    setFormIsValid(emailState.isValid && passwordState.value.length > 6);
   };
 
- /*  const collegeChangeHandler = (event) => {
+  /*  const collegeChangeHandler = (event) => {
     setEnteredCollege(event.target.value);
   }; */
 
@@ -69,48 +72,39 @@ const Login = (props) => {
   };
 
   const validatePasswordHandler = () => {
-    dispatchPassword({type: 'INPUT_BLUR'})
+    dispatchPassword({ type: "INPUT_BLUR" });
   };
- /*  const validateCollegeHandler = () => {
+  /*  const validateCollegeHandler = () => {
     setCollegeIsValid(enteredCollege.trim().length > 0);
   };
  */
   const submitHandler = (event) => {
     event.preventDefault();
-    props.onLogin(emailState.value, passwordState.value);
+    authCtx.onLogin(emailState.value, passwordState.value);
   };
 
   return (
     <Card className={classes.login}>
       <form onSubmit={submitHandler}>
-        <div
-          className={`${classes.control} ${
-            emailState.isValid === false ? classes.invalid : ""
-          }`}
-        >
-          <label htmlFor="email">E-Mail</label>
-          <input
-            type="email"
-            id="email"
-            value={emailState.value}
-            onChange={emailChangeHandler}
-            onBlur={validateEmailHandler}
-          />
-        </div>
-        <div
-          className={`${classes.control} ${
-            passwordState.isValid === false ? classes.invalid : ""
-          }`}
-        >
-          <label htmlFor="password">Password</label>
-          <input
-            type="password"
-            id="password"
-            value={passwordState.value}
-            onChange={passwordChangeHandler}
-            onBlur={validatePasswordHandler}
-          />
-        </div>
+        <Input
+          id="email"
+          label="E-mail"
+          type="text"
+          isValid={emailState.isValid}
+          value={emailState.value}
+          onChange={emailChangeHandler}
+          onBlur={validateEmailHandler}
+        />
+
+        <Input
+          id="password"
+          label="Password"
+          type="password"
+          isValid={passwordState.isValid}
+          value={passwordState.value}
+          onChange={passwordChangeHandler}
+          onBlur={validatePasswordHandler}
+        />
         {/* <div
           className={`${classes.control} ${
             collegeIsValid === false ? classes.invalid : ""
